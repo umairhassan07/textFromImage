@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCR App</title>
+    <!-- Include Tesseract.js library -->
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  </head>
+  <body>
+    <button id="openCameraBtn">Open Camera</button>
+    <button id="captureBtn">Capture Image</button>
+    <button id="extractTextBtn">Extract Text</button>
+    <video id="videoElement" width="400" height="300" autoplay></video>
+    <canvas id="canvasElement" style="display: none"></canvas>
+    <div id="textResult"></div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const fileInput = document.getElementById("fileInput");
+        const openCameraBtn = document.getElementById("openCameraBtn");
+        const captureBtn = document.getElementById("captureBtn");
+        const extractTextBtn = document.getElementById("extractTextBtn");
+        const textResult = document.getElementById("textResult");
+        const videoElement = document.getElementById("videoElement");
+        const canvasElement = document.getElementById("canvasElement");
+        let capturedImageData;
+
+        // Function to open the camera when the button is clicked
+        openCameraBtn.addEventListener("click", async () => {
+          try {
+            // Request access to the user's camera
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+            });
+            // Display the camera stream in the video element
+            videoElement.srcObject = stream;
+          } catch (error) {
+            console.error("Error accessing the camera:", error);
+          }
+        });
+
+        // Function to capture the image when the button is clicked
+        captureBtn.addEventListener("click", () => {
+          // Pause the video stream
+          videoElement.pause();
+          // Draw the current frame from the video stream onto the canvas
+          const context = canvasElement.getContext("2d");
+          canvasElement.width = videoElement.videoWidth;
+          canvasElement.height = videoElement.videoHeight;
+          context.drawImage(
+            videoElement,
+            0,
+            0,
+            canvasElement.width,
+            canvasElement.height
+          );
+          // Save the captured image data
+          capturedImageData = context.getImageData(
+            0,
+            0,
+            canvasElement.width,
+            canvasElement.height
+          );
+        });
+
+        // Function to extract text from the captured image
+        extractTextBtn.addEventListener("click", async () => {
+          try {
+            if (!capturedImageData) {
+              alert("Please capture an image first.");
+              return;
+            }
+            const worker = await Tesseract.createWorker();
+            await worker.load();
+            await worker.loadLanguage("eng");
+            await worker.initialize("eng");
+            const result = await worker.recognize(capturedImageData);
+            console.log(result);
+            textResult.textContent = result.data.text;
+            await worker.terminate();
+          } catch (error) {
+            console.error("Error performing OCR:", error);
+          }
+        });
+      });
+    </script>
+
+    <script>
+      //   const { createWorker } = require("tesseract.js");
+
+      //   (async () => {
+      //     const worker = await Tesseract.createWorker();
+      //     console.log(worker);
+
+      //     await worker.load();
+      //     await worker.loadLanguage("eng");
+      //     await worker.initialize("eng");
+
+      //     const {
+      //       data: { text },
+      //     } = await worker.recognize(
+      //       "https://tesseract.projectnaptha.com/img/eng_bw.png"
+      //     );
+      //     console.log(text);
+      //     await worker.terminate();
+      //   })();
+    </script>
+  </body>
+</html>
