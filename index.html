@@ -33,7 +33,7 @@
           try {
             // Request access to the user's camera
             const stream = await navigator.mediaDevices.getUserMedia({
-              video: true,
+              video: { facingMode: { exact: "environment" } }, // Specify to use the rear camera
             });
             // Display the camera stream in the video element
             videoElement.srcObject = stream;
