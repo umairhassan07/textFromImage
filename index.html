@@ -14,6 +14,8 @@
     <button id="extractTextBtn">Extract Text</button>
     <video id="videoElement" width="400" height="300" autoplay></video>
     <canvas id="canvasElement" style="display: none"></canvas>
+    <img id="img-preview" src="" alt="Captured Image Preview" />
+
     <div id="textResult"></div>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -44,6 +46,7 @@
         captureBtn.addEventListener("click", () => {
           // Pause the video stream
           videoElement.pause();
+
           // Draw the current frame from the video stream onto the canvas
           const context = canvasElement.getContext("2d");
           canvasElement.width = videoElement.videoWidth;
@@ -55,6 +58,7 @@
             canvasElement.width,
             canvasElement.height
           );
+
           // Save the captured image data
           capturedImageData = context.getImageData(
             0,
@@ -62,7 +66,35 @@
             canvasElement.width,
             canvasElement.height
           );
+
+          // Show the preview of the captured image
+          const imgPreview = document.getElementById("img-preview");
+          imgPreview.src = canvasElement.toDataURL(); // Convert canvas to data URL and set as image source
+
+          // Stop the video stream and hide the video element
+          const stream = videoElement.srcObject;
+          const tracks = stream.getTracks();
+          tracks.forEach((track) => track.stop());
+          videoElement.srcObject = null;
+          videoElement.style.display = "none";
         });
+
+        // Function to convert captured image data to PNG format
+        function convertToPNG(imageData) {
+          // Create a canvas element
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          // Set the canvas dimensions to match the image dimensions
+          canvas.width = imageData.width;
+          canvas.height = imageData.height;
+
+          // Put the image data onto the canvas
+          ctx.putImageData(imageData, 0, 0);
+
+          // Convert the canvas content to a data URL representing a PNG image
+          return canvas.toDataURL("image/png");
+        }
 
         // Function to extract text from the captured image
         extractTextBtn.addEventListener("click", async () => {
@@ -72,12 +104,14 @@
               return;
             }
             const worker = await Tesseract.createWorker();
-            await worker.load();
-            await worker.loadLanguage("eng");
-            await worker.initialize("eng");
-            const result = await worker.recognize(capturedImageData);
-            console.log(result);
-            textResult.textContent = result.data.text;
+
+            // Convert the captured image data to PNG format
+            const pngData = convertToPNG(capturedImageData);
+
+            const {
+              data: { text },
+            } = await worker.recognize(pngData);
+            textResult.textContent = text;
             await worker.terminate();
           } catch (error) {
             console.error("Error performing OCR:", error);
