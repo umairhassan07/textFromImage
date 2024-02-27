@@ -8,15 +8,58 @@
 
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   </head>
-  <body>
-    <button id="openCameraBtn">Open Camera</button>
-    <button id="captureBtn">Capture Image</button>
-    <button id="extractTextBtn">Extract Text</button>
-    <video id="videoElement" width="400" height="300" autoplay></video>
-    <canvas id="canvasElement" style="display: none"></canvas>
-    <img id="img-preview" src="" alt="Captured Image Preview" />
+  <style>
+    .button_groups,
+    .video-elemets {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .video-elemets {
+      margin-bottom: 30px;
+    }
 
-    <div id="textResult"></div>
+    button {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+    #videoElement {
+      border-radius: 20px;
+    }
+    button:hover {
+      color: whites;
+    }
+    canvas {
+      width: 400px;
+      height: 300px;
+      border-radius: 10px;
+    }
+    #textResult {
+      height: 200px;
+      width: 600px;
+      margin: 30px auto;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      border: 1px solid gray;
+    }
+  </style>
+  <body>
+    <div class="video-elemets">
+      <video id="videoElement" width="400" height="300" autoplay></video>
+      <canvas id="canvasElement" style="display: block"></canvas>
+    </div>
+    <div class="button_groups">
+      <button id="openCameraBtn">Open Camera</button>
+      <button id="captureBtn">Capture Image</button>
+      <button id="extractTextBtn">Extract Text</button>
+    </div>
+
+    <!-- <img id="img-preview" src="" alt="Captured Image Preview" /> -->
+
+    <textarea id="textResult" placeholder="Text Preview"></textarea>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const fileInput = document.getElementById("fileInput");
@@ -45,7 +88,7 @@
         // Function to capture the image when the button is clicked
         captureBtn.addEventListener("click", () => {
           // Pause the video stream
-          videoElement.pause();
+          //   videoElement.pause();
 
           // Draw the current frame from the video stream onto the canvas
           const context = canvasElement.getContext("2d");
