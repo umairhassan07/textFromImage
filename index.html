@@ -45,6 +45,16 @@
       display: flex;
       border: 1px solid gray;
     }
+
+    @media only screen and (max-width: 600px) {
+      canvas,
+      .video-elemets {
+        width: 100%;
+      }
+      #textResult {
+        width: 100%;
+      }
+    }
   </style>
   <body>
     <div class="video-elemets">
@@ -78,6 +88,8 @@
             const stream = await navigator.mediaDevices.getUserMedia({
               video: { facingMode: { exact: "environment" } }, // Specify to use the rear camera
             });
+            videoElement.style.display = "block";
+
             // Display the camera stream in the video element
             videoElement.srcObject = stream;
           } catch (error) {
